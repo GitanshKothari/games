@@ -26,6 +26,11 @@ class Sudoku:
         self.curr_row = 0
         self.curr_column = 0
 
+        # Add buttons
+        self.reset_button = pygame.Rect(50, 520, 100, 50)
+        self.solve_button = pygame.Rect(350, 520, 100, 50)
+        self.reset_text = self.font2.render("Reset", True, (0, 0, 0))
+        self.solve_text = self.font2.render("Solve", True, (0, 0, 0))
 
     def reset_board(self):
         self.get_sudoku_board_from_api()
@@ -59,6 +64,12 @@ class Sudoku:
                 thick = 1
             pygame.draw.line(self.screen, (0, 0, 0), (0, i * self.cell_width), (500, i * self.cell_width), thick)
             pygame.draw.line(self.screen, (0, 0, 0), (i * self.cell_width, 0), (i * self.cell_width, 500), thick)
+
+        # Draw buttons
+        pygame.draw.rect(self.screen, (255, 0, 0), self.reset_button)
+        pygame.draw.rect(self.screen, (255, 0, 0), self.solve_button)
+        self.screen.blit(self.reset_text, (self.reset_button.x + 20, self.reset_button.y + 10))
+        self.screen.blit(self.solve_text, (self.solve_button.x + 20, self.solve_button.y + 10))
 
     # Raise error when wrong value entered
     def raise_error1(self):
@@ -137,11 +148,14 @@ class Sudoku:
                         flag2 = 1
                     if event.key == pygame.K_r:
                         self.reset_board()
-                    
-            if flag2 == 1:
-                if self.solve():
-                    print("Solved")
-                flag2 = 0
+                # Check if mouse is clicked
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    # Check if mouse is clicked on the button
+                    if self.reset_button.collidepoint(event.pos):
+                        self.reset_board()
+                    if self.solve_button.collidepoint(event.pos):
+                        if self.solve():
+                            print("Solved")
 
             self.draw() 
 
@@ -155,8 +169,3 @@ class Sudoku:
 if __name__ == '__main__':
     new_board = Sudoku()
     new_board.get_sudoku_board_from_api()
-
-
-
-
-
