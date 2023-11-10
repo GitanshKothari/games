@@ -27,6 +27,9 @@ class Sudoku:
         self.curr_column = 0
 
 
+    def reset_board(self):
+        self.get_sudoku_board_from_api()
+
     def get_mouse_cord(self, pos):
         self.x = pos[0]//self.cell_width
         self.y = pos[1]//self.cell_width
@@ -47,7 +50,7 @@ class Sudoku:
 
                     # Fill grid with default numbers specified
                     text1 = self.font1.render(str(self.board[i][j]), 1, (0, 0, 0))
-                    self.screen.blit(text1, (i * self.cell_width + 15, j * self.cell_width + 15))
+                    self.screen.blit(text1, (i * self.cell_width + 15, j * self.cell_width))
         # Draw lines horizontally and verticallyto form grid		 
         for i in range(10):
             if i % 3 == 0 :
@@ -56,10 +59,6 @@ class Sudoku:
                 thick = 1
             pygame.draw.line(self.screen, (0, 0, 0), (0, i * self.cell_width), (500, i * self.cell_width), thick)
             pygame.draw.line(self.screen, (0, 0, 0), (i * self.cell_width, 0), (i * self.cell_width, 500), thick)
-
-    def draw_val(self, val):
-        text1 = self.font1.render(str(val), 1, (0, 0, 0))
-        self.screen.blit(text1, (self.mouse_x * self.cell_width + 15, self.mouse_y * self.cell_height + 15)) 
 
     # Raise error when wrong value entered
     def raise_error1(self):
@@ -71,8 +70,10 @@ class Sudoku:
 
 
     def get_sudoku_board_from_api(self) -> None:
+        
         # url = 'https://sudoku-api.vercel.app/api/dosuku?query={newboard(limit:1){grids{value}}}'
-        url = 'https://sudoku-api.vercel.app/api/dosuku'
+        # url = 'https://sudoku-api.vercel.app/api/dosuku'
+        url = 'https://sudoku-api.vercel.app/api/dosuku?query={newboard(limit:1){grids{value}}}'
         response = requests.get(url)
         if response.status_code == 200:
             data = response.json()
@@ -110,13 +111,6 @@ class Sudoku:
                     return False
         return True
 
-    def get_solution(self):
-        if self.solve():
-            print('Backtracking Solution: ')
-            self.print_board()
-        else:
-            print('No solution exists')
-
     def is_safe(self, row, col, num):
         for x in range(9):
             if self.board[row][x] == num or self.board[x][col] == num or self.board[(row - row % 3) + x // 3][(col - col % 3) + x % 3] == num:
@@ -125,10 +119,8 @@ class Sudoku:
         
     def run_game(self):
         run = True
-        flag1 = 0
         flag2 = 0
-        rs = 0
-        error = 0
+
         # The loop thats keep the window running
         while run:
             
@@ -139,68 +131,19 @@ class Sudoku:
                 # Quit the game window
                 if event.type == pygame.QUIT:
                     run = False
-                # Get the mouse position to insert number 
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    flag1 = 1
-                    pos = pygame.mouse.get_pos()
-                    self.get_cord(pos)
                 # Get the number to be inserted if key pressed 
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_LEFT:
-                        x-= 1
-                        flag1 = 1
-                    if event.key == pygame.K_RIGHT:
-                        x+= 1
-                        flag1 = 1
-                    if event.key == pygame.K_UP:
-                        y-= 1
-                        flag1 = 1
-                    if event.key == pygame.K_DOWN:
-                        y+= 1
-                        flag1 = 1
-                    if event.key == pygame.K_1:
-                        val = 1
-                    if event.key == pygame.K_2:
-                        val = 2
-                    if event.key == pygame.K_3:
-                        val = 3
-                    if event.key == pygame.K_4:
-                        val = 4
-                    if event.key == pygame.K_5:
-                        val = 5
-                    if event.key == pygame.K_6:
-                        val = 6
-                    if event.key == pygame.K_7:
-                        val = 7
-                    if event.key == pygame.K_8:
-                        val = 8
-                    if event.key == pygame.K_9:
-                        val = 9
                     if event.key == pygame.K_RETURN:
                         flag2 = 1
+                    if event.key == pygame.K_r:
+                        self.reset_board()
                     
             if flag2 == 1:
-                if self.solve() == False:
-                    error = 1
-                else:
-                    rs = 1
+                if self.solve():
+                    print("Solved")
                 flag2 = 0
-            # if val != 0:	
-                # draw_val(val)
-                # # print(x)
-                # # print(y)
-                # if valid(grid, int(x), int(y), val)== True:
-                #     grid[int(x)][int(y)]= val
-                #     flag1 = 0
-                # else:
-                #     grid[int(x)][int(y)]= 0
-                #     raise_error2() 
-                # val = 0
-            
-        	 
+
             self.draw() 
-            if flag1 == 1:
-                self.highlight_box()	 
 
             # Update window
             pygame.display.update() 
